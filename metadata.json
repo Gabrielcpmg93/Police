@@ -1,0 +1,5 @@
+{
+  "name": "Patrulha Pixel IA",
+  "description": "Um jogo de simulação policial estilo retrô onde você inspeciona veículos, verifica violações e emite multas usando cenários gerados por IA.",
+  "requestFramePermissions": []
+}
