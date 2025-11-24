@@ -28,7 +28,7 @@ const scenarioSchema: Schema = {
 export const generateTrafficStop = async (): Promise<GeneratedScenario> => {
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.0-flash",
       contents: "Gere um cenário de parada de trânsito para um jogo policial retrô dos anos 80. A data atual do jogo é 24 de Setembro de 1986.",
       config: {
         responseMimeType: "application/json",
@@ -46,7 +46,7 @@ export const generateTrafficStop = async (): Promise<GeneratedScenario> => {
     // Fallback data in case of error to keep game running
     return {
       driverName: "João da Silva",
-      driverDialogue: "Meu rádio pifou, seu guarda!",
+      driverDialogue: "O sistema caiu, seu guarda! Me deixa ir?",
       vehicleModel: "Sedan",
       vehicleColor: "Blue",
       plateNumber: "ABC-1234",
