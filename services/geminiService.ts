@@ -1,7 +1,8 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { GeneratedScenario, ViolationType } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Removed top-level initialization to prevent crash before API Key selection
+// const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const scenarioSchema: Schema = {
   type: Type.OBJECT,
@@ -27,8 +28,11 @@ const scenarioSchema: Schema = {
 
 export const generateTrafficStop = async (): Promise<GeneratedScenario> => {
   try {
+    // Initialize AI here to ensure process.env.API_KEY is available after user selection
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: "Gere um cenário de parada de trânsito para um jogo policial retrô dos anos 80. A data atual do jogo é 24 de Setembro de 1986.",
       config: {
         responseMimeType: "application/json",

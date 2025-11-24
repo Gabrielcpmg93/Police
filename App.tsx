@@ -5,8 +5,48 @@ import TicketBook from './components/TicketBook';
 import { GameState, InteractionMode, GeneratedScenario, ViolationType } from './types';
 import { generateTrafficStop } from './services/geminiService';
 
+// Extend Window interface for AI Studio helpers
+declare global {
+  // We augment the existing AIStudio interface to avoid conflicts with the global declaration
+  interface AIStudio {
+    hasSelectedApiKey(): Promise<boolean>;
+    openSelectKey(): Promise<void>;
+  }
+}
+
 const App: React.FC = () => {
-  // Game State
+  // --- API Key / Start Screen State ---
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const [isCheckingKey, setIsCheckingKey] = useState(true);
+
+  useEffect(() => {
+    const checkKey = async () => {
+      try {
+        if (window.aistudio) {
+          const has = await window.aistudio.hasSelectedApiKey();
+          setHasApiKey(has);
+        } else {
+          // If not in AI Studio environment, assume true (or dev mode)
+          setHasApiKey(true);
+        }
+      } catch (e) {
+        console.error("Error checking API key:", e);
+      } finally {
+        setIsCheckingKey(false);
+      }
+    };
+    checkKey();
+  }, []);
+
+  const handleStartGame = async () => {
+    if (window.aistudio) {
+      await window.aistudio.openSelectKey();
+      // Assume success after closing dialog to handle race condition
+      setHasApiKey(true);
+    }
+  };
+
+  // --- Game State ---
   const [gameState, setGameState] = useState<GameState>({
     score: 0,
     quota: 5,
@@ -153,6 +193,39 @@ const App: React.FC = () => {
         case ViolationType.NO_INSURANCE: return "SEM SEGURO";
         default: return v;
       }
+  }
+
+  // --- RENDER ---
+
+  if (isCheckingKey) {
+    return (
+      <div className="w-full h-screen bg-black flex items-center justify-center font-mono text-green-500">
+        CARREGANDO SISTEMA...
+      </div>
+    );
+  }
+
+  if (!hasApiKey) {
+    return (
+      <div className="w-full h-[100dvh] bg-black flex flex-col items-center justify-center font-mono p-4 text-center select-none">
+        <h1 className="text-4xl md:text-6xl text-white mb-4 animate-pulse" style={{ fontFamily: '"VT323", monospace' }}>
+          PATRULHA PIXEL
+        </h1>
+        <div className="border-4 border-green-700 p-8 bg-[#111] shadow-lg max-w-md w-full">
+          <p className="text-green-500 text-lg mb-6 leading-relaxed">
+            ACESSO RESTRITO.<br/>
+            IDENTIFICAÇÃO NECESSÁRIA PARA INICIAR TURNO.
+          </p>
+          <button 
+            onClick={handleStartGame}
+            className="w-full bg-green-700 text-black font-bold text-xl py-4 border-2 border-green-500 hover:bg-green-500 hover:border-white transition-all shadow-[0_0_15px_rgba(0,255,0,0.4)] uppercase"
+          >
+            INSERIR CREDENCIAIS
+          </button>
+        </div>
+        <p className="text-gray-600 mt-8 text-xs">V 1.0.3 - SISTEMA BETA</p>
+      </div>
+    );
   }
 
   return (
